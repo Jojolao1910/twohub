@@ -1,405 +1,389 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>TubHub - Baixe vídeos do YouTube</title>
-    <link rel="icon" type="image/png" sizes="100x100" href="logo.png">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TubHub - Baixe vídeos do YouTube e Converta Imagens</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-      tailwind.config = {
-        darkMode: "class",
-        theme: {
-          extend: {
-            colors: {
-              primary: {
-                DEFAULT: "#3b82f6",
-                foreground: "#ffffff",
-              },
-              secondary: {
-                DEFAULT: "#f3f4f6",
-                foreground: "#1f2937",
-              },
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            DEFAULT: '#3b82f6',
+                            foreground: '#ffffff',
+                        },
+                        secondary: {
+                            DEFAULT: '#f3f4f6',
+                            foreground: '#1f2937',
+                        },
+                    },
+                },
             },
-          },
-        },
-      };
+        }
     </script>
-    <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
-    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  </head>
-  <body>
-    <div id="root"></div>
-
-    <script type="text/babel">
-      const translations = {
-        pt: {
-          title: "TubHub - Baixe vídeos do YouTube",
-          subtitle: "Baixe vídeos do YouTube com facilidade",
-          downloadTitle: "Baixar Vídeo do YouTube",
-          downloadInstructions:
-            "Cole o link do vídeo do YouTube abaixo, escolha as opções e clique em Baixar",
-          format: "Formato",
-          resolution: "Resolução",
-          download: "Baixar",
-          processing: "Processando...",
-          clickToDownload: "Clique aqui para baixar",
-          howToUse: "Como usar",
-          howToUseSteps: [
-            "Cole o link do vídeo do YouTube no campo acima",
-            "Escolha o formato (MP3 ou MP4) e a resolução desejada",
-            'Clique no botão "Baixar"',
-            "Aguarde o processamento do vídeo",
-            "Clique no link de download quando estiver pronto",
-          ],
-          footer:
-            "© 2023 TubHub. Todos os direitos reservados. Use com responsabilidade e respeite os direitos autorais.",
-        },
-        en: {
-          title: "TubHub - Download YouTube Videos",
-          subtitle: "Download YouTube videos with ease",
-          downloadTitle: "Download YouTube Video",
-          downloadInstructions:
-            "Paste the YouTube video link below, choose options and click Download",
-          format: "Format",
-          resolution: "Resolution",
-          download: "Download",
-          processing: "Processing...",
-          clickToDownload: "Click here to download",
-          howToUse: "How to use",
-          howToUseSteps: [
-            "Paste the YouTube video link in the field above",
-            "Choose the format (MP3 or MP4) and desired resolution",
-            'Click the "Download" button',
-            "Wait for the video to process",
-            "Click the download link when ready",
-          ],
-          footer:
-            "© 2023 TubHub. All rights reserved. Use responsibly and respect copyrights.",
-        },
-        es: {
-          title: "TubHub - Descarga videos de YouTube",
-          subtitle: "Descarga videos de YouTube con facilidad",
-          downloadTitle: "Descargar Video de YouTube",
-          downloadInstructions:
-            "Pega el enlace del video de YouTube abajo, elige las opciones y haz clic en Descargar",
-          format: "Formato",
-          resolution: "Resolución",
-          download: "Descargar",
-          processing: "Procesando...",
-          clickToDownload: "Haz clic aquí para descargar",
-          howToUse: "Cómo usar",
-          howToUseSteps: [
-            "Pega el enlace del video de YouTube en el campo de arriba",
-            "Elige el formato (MP3 o MP4) y la resolución deseada",
-            'Haz clic en el botón "Descargar"',
-            "Espera a que se procese el video",
-            "Haz clic en el enlace de descarga cuando esté listo",
-          ],
-          footer:
-            "© 2024 TubHub. Todos los derechos reservados. Úsalo responsablemente y respeta los derechos de autor.",
-        },
-      };
-
-      function TubHub() {
-        const [theme, setTheme] = React.useState(() => {
-          return localStorage.getItem("theme") || "light";
-        });
-        const [lang, setLang] = React.useState(() => {
-          return localStorage.getItem("lang") || "pt";
-        });
-        const [videoUrl, setVideoUrl] = React.useState("");
-        const [format, setFormat] = React.useState("mp4");
-        const [resolution, setResolution] = React.useState("720p");
-        const [isLoading, setIsLoading] = React.useState(false);
-        const [downloadLink, setDownloadLink] = React.useState("");
-
-        const t = translations[lang];
-
-        React.useEffect(() => {
-          document.documentElement.classList.toggle("dark", theme === "dark");
-          localStorage.setItem("theme", theme);
-          localStorage.setItem("lang", lang);
-          document.title = t.title;
-        }, [theme, lang]);
-
-        const toggleTheme = () => {
-          setTheme((prevTheme) => (prevTheme === "light" ? "dark" : "light"));
-        };
-
-        const changeLanguage = (newLang) => {
-          setLang(newLang);
-        };
-
-        const handleDownload = async () => {
-          setIsLoading(true);
-          setDownloadLink("");
-
-          try {
-            const response = await fetch("http://localhost:5000/api/download", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ url: videoUrl, format, resolution }),
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-              setDownloadLink(
-                `http://localhost:5000/api/download/${data.filename}`
-              );
-            } else {
-              alert("Erro ao processar o vídeo. Por favor, tente novamente.");
-            }
-          } catch (error) {
-            alert("Ocorreu um erro. Por favor, tente novamente mais tarde.");
-          } finally {
-            setIsLoading(false);
-          }
-        };
-
-        return (
-          <div
-            className={`min-h-screen bg-gradient-to-b from-white to-gray-100 dark:from-gray-900 dark:to-gray-800 transition-colors duration-300 ${theme}`}
-          >
-            <header className="py-6 bg-white dark:bg-gray-800 shadow-md">
-              <div className="container mx-auto px-4 flex justify-between items-center">
-                <div>
-                  <h1 className="text-2xl md:text-3xl font-bold text-primary flex items-center">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-8 w-8 mr-2"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path>
-                      <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 transition-colors duration-300">
+    <header class="bg-white dark:bg-gray-800 shadow-md py-4">
+        <div class="container mx-auto px-4 flex justify-between items-center">
+            <h1 class="text-2xl md:text-3xl font-bold text-primary flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path>
+                    <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon>
+                </svg>
+                TubHub
+            </h1>
+            <div class="flex items-center space-x-4">
+                <div class="flex space-x-2">
+                    <button id="lang-pt" class="w-8 h-8 rounded-full overflow-hidden ring-2 ring-primary">
+                        <img src="https://flagcdn.com/w40/br.png" alt="Português" class="w-full h-full object-cover">
+                    </button>
+                    <button id="lang-en" class="w-8 h-8 rounded-full overflow-hidden">
+                        <img src="https://flagcdn.com/w40/gb.png" alt="English" class="w-full h-full object-cover">
+                    </button>
+                    <button id="lang-es" class="w-8 h-8 rounded-full overflow-hidden">
+                        <img src="https://flagcdn.com/w40/es.png" alt="Español" class="w-full h-full object-cover">
+                    </button>
+                </div>
+                <button id="theme-toggle" class="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                     </svg>
-                    TubHub
-                  </h1>
-                  <p className="text-gray-600 dark:text-gray-300 mt-2 text-sm md:text-base">
-                    {t.subtitle}
-                  </p>
-                </div>
-                <div className="flex items-center space-x-4">
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => changeLanguage("pt")}
-                      className={`w-8 h-8 rounded-full overflow-hidden ${
-                        lang === "pt" ? "ring-2 ring-primary" : ""
-                      }`}
-                    >
-                      <img
-                        src="https://flagcdn.com/w40/br.png"
-                        alt="Português"
-                        className="w-full h-full object-cover"
-                      />
-                    </button>
-                    <button
-                      onClick={() => changeLanguage("en")}
-                      className={`w-8 h-8 rounded-full overflow-hidden ${
-                        lang === "en" ? "ring-2 ring-primary" : ""
-                      }`}
-                    >
-                      <img
-                        src="https://flagcdn.com/w40/gb.png"
-                        alt="English"
-                        className="w-full h-full object-cover"
-                      />
-                    </button>
-                    <button
-                      onClick={() => changeLanguage("es")}
-                      className={`w-8 h-8 rounded-full overflow-hidden ${
-                        lang === "es" ? "ring-2 ring-primary" : ""
-                      }`}
-                    >
-                      <img
-                        src="https://flagcdn.com/w40/es.png"
-                        alt="Español"
-                        className="w-full h-full object-cover"
-                      />
-                    </button>
-                  </div>
-                  <button
-                    onClick={toggleTheme}
-                    className="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
-                  >
-                    {theme === "dark" ? (
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-6 w-6"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
-                        />
-                      </svg>
-                    ) : (
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-6 w-6"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
-                        />
-                      </svg>
-                    )}
-                  </button>
-                </div>
-              </div>
-            </header>
+                </button>
+            </div>
+        </div>
+    </header>
 
-            <main className="flex-grow container mx-auto px-4 py-8">
-              <div className="w-full max-w-2xl mx-auto bg-white dark:bg-gray-700 rounded-lg shadow-lg overflow-hidden">
-                <div className="p-6">
-                  <h2 className="text-xl md:text-2xl font-semibold mb-2 text-gray-800 dark:text-white">
-                    {t.downloadTitle}
-                  </h2>
-                  <p className="text-gray-600 dark:text-gray-300 mb-4">
-                    {t.downloadInstructions}
-                  </p>
-                  <div className="space-y-4">
-                    <input
-                      type="url"
-                      placeholder="https://www.youtube.com/watch?v=..."
-                      value={videoUrl}
-                      onChange={(e) => setVideoUrl(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-800 dark:text-white"
-                    />
-                    <div className="flex space-x-4">
-                      <div className="flex-1">
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                          {t.format}
-                        </label>
-                        <select
-                          value={format}
-                          onChange={(e) => setFormat(e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-800 dark:text-white"
-                        >
-                          <option value="mp4">MP4</option>
-                          <option value="mp3">MP3</option>
-                        </select>
-                      </div>
-                      <div className="flex-1">
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                          {t.resolution}
-                        </label>
-                        <select
-                          value={resolution}
-                          onChange={(e) => setResolution(e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-800 dark:text-white"
-                          disabled={format === "mp3"}
-                        >
-                          <option value="360p">360p</option>
-                          <option value="480p">480p</option>
-                          <option value="720p">720p</option>
-                          <option value="1080p">1080p</option>
-                        </select>
-                      </div>
+    <main class="container mx-auto px-4 py-8">
+        <div class="flex flex-wrap -mx-4">
+            <!-- Seção de Download de Vídeo -->
+            <div class="w-full lg:w-1/2 px-4 mb-8">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+                    <div class="p-6">
+                        <h2 class="text-xl md:text-2xl font-semibold mb-4 text-gray-800 dark:text-white" data-i18n="downloadTitle">Baixar Vídeo do YouTube</h2>
+                        <form id="video-form" class="space-y-4">
+                            <input type="url" id="video-url" placeholder="https://www.youtube.com/watch?v=..." class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-white" required>
+                            <div class="flex space-x-4">
+                                <div class="flex-1">
+                                    <label for="format" class="block text-sm font-medium mb-1" data-i18n="format">Formato</label>
+                                    <select id="format" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-white">
+                                        <option value="mp4">MP4</option>
+                                        <option value="mp3">MP3</option>
+                                    </select>
+                                </div>
+                                <div class="flex-1">
+                                    <label for="resolution" class="block text-sm font-medium mb-1" data-i18n="resolution">Resolução</label>
+                                    <select id="resolution" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-white">
+                                        <option value="360p">360p</option>
+                                        <option value="480p">480p</option>
+                                        <option value="720p">720p</option>
+                                        <option value="1080p">1080p</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button type="submit" class="w-full px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50" data-i18n="download">
+                                Baixar
+                            </button>
+                        </form>
+                        <div id="download-result" class="mt-4 hidden">
+                            <a href="#" id="download-link" class="block w-full text-center px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50" data-i18n="clickToDownload">
+                                Clique aqui para baixar
+                            </a>
+                        </div>
+                        <section class="mt-8 text-center">
+                            <h2 class="text-xl md:text-2xl font-semibold mb-4 text-gray-800 dark:text-white" data-i18n="howToUse">Como usar</h2>
+                            <ol class="list-decimal list-inside space-y-2 text-sm md:text-base inline-block text-left">
+                                <li data-i18n="step1">Cole o link do vídeo do YouTube no campo acima</li>
+                                <li data-i18n="step2">Escolha o formato (MP3 ou MP4) e a resolução desejada</li>
+                                <li data-i18n="step3">Clique no botão "Baixar"</li>
+                                <li data-i18n="step4">Aguarde o processamento do vídeo</li>
+                                <li data-i18n="step5">Clique no link de download quando estiver pronto</li>
+                            </ol>
+                        </section>
                     </div>
-                    <button
-                      onClick={handleDownload}
-                      disabled={!videoUrl || isLoading}
-                      className="w-full px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {isLoading ? (
-                        <span className="flex items-center justify-center">
-                          <svg
-                            className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                          >
-                            <circle
-                              className="opacity-25"
-                              cx="12"
-                              cy="12"
-                              r="10"
-                              stroke="currentColor"
-                              strokeWidth="4"
-                            ></circle>
-                            <path
-                              className="opacity-75"
-                              fill="currentColor"
-                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                            ></path>
-                          </svg>
-                          {t.processing}
-                        </span>
-                      ) : (
-                        <>
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-5 w-5 inline-block mr-2"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                          {t.download}
-                        </>
-                      )}
-                    </button>
-                    {downloadLink && (
-                      <div className="mt-4">
-                        <a
-                          href={downloadLink}
-                          className="block w-full text-center px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          {t.clickToDownload}
-                        </a>
-                      </div>
-                    )}
-                  </div>
                 </div>
-              </div>
+            </div>
 
-              <section className="mt-12 text-center">
-                <h2 className="text-xl md:text-2xl font-semibold mb-4 text-gray-800 dark:text-white">
-                  {t.howToUse}
-                </h2>
-                <ol className="list-decimal list-inside space-y-2 text-sm md:text-base inline-block text-left text-gray-700 dark:text-gray-300">
-                  {t.howToUseSteps.map((step, index) => (
-                    <li key={index}>{step}</li>
-                  ))}
-                </ol>
-              </section>
-            </main>
+            <!-- Nova Seção de Conversão de Imagem -->
+            <div class="w-full lg:w-1/2 px-4 mb-8">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+                    <div class="p-6">
+                        <h2 class="text-xl md:text-2xl font-semibold mb-4 text-gray-800 dark:text-white" data-i18n="convertImageTitle">Converter Imagem</h2>
+                        <form id="image-form" class="space-y-4">
+                            <div class="flex items-center justify-center w-full">
+                                <label for="image-upload" class="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500">
+                                    <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                        <svg class="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
+                                        </svg>
+                                        <p class="mb-2 text-sm text-gray-500 dark:text-gray-400"><span class="font-semibold" data-i18n="dropImage">Arraste e solte a imagem aqui</span></p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400" data-i18n="orClickToUpload">ou clique para fazer upload</p>
+                                    </div>
+                                    <input id="image-upload" type="file" class="hidden" accept="image/*" />
+                                </label>
+                            </div>
+                            <div id="image-preview" class="hidden">
+                                <img id="preview" src="#" alt="Preview" class="max-w-full h-auto rounded-lg shadow-lg" />
+                            </div>
+                            <div class="flex space-x-4">
+                                <div class="flex-1">
+                                    <label for="image-format" class="block text-sm font-medium mb-1" data-i18n="targetFormat">Formato de Destino</label>
+                                    <select id="image-format" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-white">
+                                        <option value="png">PNG</option>
+                                        <option value="jpg">JPG</option>
+                                        <option value="webp">WebP</option>
+                                        <option value="gif">GIF</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button type="submit" class="w-full px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50" data-i18n="convertImage">
+                                Converter Imagem
+                            </button>
+                        </form>
+                        <div id="image-result" class="mt-4 hidden">
+                            <a href="#" id="image-download-link" class="block w-full text-center px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50" data-i18n="downloadConvertedImage">
+                                Baixar Imagem Convertida
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-            <footer className="bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 py-6 mt-8">
-              <div className="container mx-auto px-4">
-                <p className="text-center text-sm md:text-base">{t.footer}</p>
-              </div>
-            </footer>
-          </div>
-        );
-      }
+        <footer class="bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 py-6 mt-8">
+            <div class="container mx-auto px-4">
+                <p class="text-center text-sm md:text-base" data-i18n="footer">
+                    © 2023 TubHub. Todos os direitos reservados. Use com responsabilidade e respeite os direitos autorais.
+                </p>
+            </div>
+        </footer>
 
-      ReactDOM.render(<TubHub />, document.getElementById("root"));
+    <script>
+        // Traduções
+        const translations = {
+            pt: {
+                downloadTitle: "Baixar Vídeo do YouTube",
+                convertImageTitle: "Converter Imagem",
+                format: "Formato",
+                resolution: "Resolução",
+                download: "Baixar",
+                clickToDownload: "Clique aqui para baixar",
+                dropImage: "Arraste e solte a imagem aqui",
+                orClickToUpload: "ou clique para fazer upload",
+                targetFormat: "Formato de Destino",
+                convertImage: "Converter Imagem",
+                downloadConvertedImage: "Baixar Imagem Convertida",
+                howToUse: "Como  usar",
+                step1: "Cole o link do vídeo do YouTube no campo acima",
+                step2: "Escolha o formato (MP3 ou MP4) e a resolução desejada",
+                step3: 'Clique no botão "Baixar"',
+                step4: "Aguarde o processamento do vídeo",
+                step5: "Clique no link de download quando estiver pronto",
+                footer: "© 2023 TubHub. Todos os direitos reservados. Use com responsabilidade e respeite os direitos autorais."
+            },
+            en: {
+                downloadTitle: "Download YouTube Video",
+                convertImageTitle: "Convert Image",
+                format: "Format",
+                resolution: "Resolution",
+                download: "Download",
+                clickToDownload: "Click here to download",
+                dropImage: "Drag and drop image here",
+                orClickToUpload: "or click to upload",
+                targetFormat: "Target Format",
+                convertImage: "Convert Image",
+                downloadConvertedImage: "Download Converted Image",
+                howToUse: "How to use",
+                step1: "Paste the YouTube video link in the field above",
+                step2: "Choose the format (MP3 or MP4) and desired resolution",
+                step3: 'Click the "Download" button',
+                step4: "Wait for the video to process",
+                step5: "Click the download link when ready",
+                footer: "© 2023 TubHub. All rights reserved. Use responsibly and respect copyrights."
+            },
+            es: {
+                downloadTitle: "Descargar Video de YouTube",
+                convertImageTitle: "Convertir Imagen",
+                format: "Formato",
+                resolution: "Resolución",
+                download: "Descargar",
+                clickToDownload: "Haz clic aquí para descargar",
+                dropImage: "Arrastra y suelta la imagen aquí",
+                orClickToUpload: "o haz clic para subir",
+                targetFormat: "Formato de Destino",
+                convertImage: "Convertir Imagen",
+                downloadConvertedImage: "Descargar Imagen Convertida",
+                howToUse: "Cómo usar",
+                step1: "Pega el enlace del video de YouTube en el campo de arriba",
+                step2: "Elige el formato (MP3 o MP4) y la resolución deseada",
+                step3: 'Haz clic en el botón "Descargar"',
+                step4: "Espera a que se procese el video",
+                step5: "Haz clic en el enlace de descarga cuando esté listo",
+                footer: "© 2023 TubHub. Todos los derechos reservados. Úsalo responsablemente y respeta los derechos de autor."
+            }
+        };
+
+        // Função para mudar o idioma
+        function changeLanguage(lang) {
+            document.querySelectorAll('[data-i18n]').forEach(elem => {
+                const key = elem.getAttribute('data-i18n');
+                elem.textContent = translations[lang][key];
+            });
+            localStorage.setItem('lang', lang);
+        }
+
+        // Inicializar o idioma
+        const savedLang = localStorage.getItem('lang') || 'pt';
+        changeLanguage(savedLang);
+
+        // Event listeners para os botões de idioma
+        document.getElementById('lang-pt').addEventListener('click', () => changeLanguage('pt'));
+        document.getElementById('lang-en').addEventListener('click', () => changeLanguage('en'));
+        document.getElementById('lang-es').addEventListener('click', () => changeLanguage('es'));
+
+        // Alternar tema claro/escuro
+        const themeToggle = document.getElementById('theme-toggle');
+        const htmlElement = document.documentElement;
+
+        function setTheme(isDark) {
+            htmlElement.classList.toggle('dark', isDark);
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            themeToggle.innerHTML = isDark
+                ? '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>'
+                : '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>';
+        }
+
+        // Inicializar o tema
+        const savedTheme = localStorage.getItem('theme');
+        setTheme(savedTheme === 'dark');
+
+        themeToggle.addEventListener('click', () => {
+            const isDark = htmlElement.classList.toggle('dark');
+            setTheme(isDark);
+        });
+
+        // Função para simular o download do vídeo
+        async function downloadVideo(url, format, resolution) {
+            // Simular uma chamada de API
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            return {
+                success: true,
+                downloadUrl: `https://example.com/download?url=${encodeURIComponent(url)}&format=${format}&resolution=${resolution}`
+            };
+        }
+
+        // Event listener para o formulário de download de vídeo
+        document.getElementById('video-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const videoUrl = document.getElementById('video-url').value;
+            const format = document.getElementById('format').value;
+            const resolution = document.getElementById('resolution').value;
+            const downloadButton = e.target.querySelector('button[type="submit"]');
+            const downloadResult = document.getElementById('download-result');
+            const downloadLink = document.getElementById('download-link');
+
+            downloadButton.disabled = true;
+            downloadButton.textContent = 'Processando...';
+
+            try {
+                const result = await downloadVideo(videoUrl, format, resolution);
+                if (result.success) {
+                    downloadLink.href = result.downloadUrl;
+                    downloadResult.classList.remove('hidden');
+                } else {
+                    alert('Erro ao processar o vídeo. Por favor, tente novamente.');
+                }
+            } catch (error) {
+                alert('Ocorreu um erro. Por favor, tente novamente mais tarde.');
+            } finally {
+                downloadButton.disabled = false;
+                downloadButton.textContent = 'Baixar';
+            }
+        });
+
+        // Desabilitar resolução quando MP3 for selecionado
+        document.getElementById('format').addEventListener('change', (e) => {
+            const resolutionSelect = document.getElementById('resolution');
+            resolutionSelect.disabled = e.target.value === 'mp3';
+            if (e.target.value === 'mp3') {
+                resolutionSelect.value = '';
+            }
+        });
+
+        // Função para converter imagem (simulação)
+        async function convertImage(file, format) {
+            // Simular processamento
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            // Na prática, você usaria uma biblioteca como canvas ou uma API de backend para converter a imagem
+            const fakeConvertedImageUrl = URL.createObjectURL(file);
+            
+            return {
+                success: true,
+                convertedImageUrl: fakeConvertedImageUrl
+            };
+        }
+
+        // Event listener para o upload de imagem
+        document.getElementById('image-upload').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            const dropText = document.querySelector('.text-sm.text-gray-500.dark\\:text-gray-400');
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('preview').src = e.target.result;
+                    document.getElementById('image-preview').classList.remove('hidden');
+                    dropText.classList.add('hidden');
+                }
+                reader.readAsDataURL(file);
+            } else {
+                document.getElementById('image-preview').classList.add('hidden');
+                dropText.classList.remove('hidden');
+            }
+        });
+
+        // Event listener para o formulário de conversão de imagem
+        document.getElementById('image-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const imageFile = document.getElementById('image-upload').files[0];
+            const format = document.getElementById('image-format').value;
+            const convertButton = e.target.querySelector('button[type="submit"]');
+            const imageResult = document.getElementById('image-result');
+            const imageDownloadLink = document.getElementById('image-download-link');
+
+            if (!imageFile) {
+                alert('Por favor, selecione uma imagem para converter.');
+                return;
+            }
+
+            convertButton.disabled = true;
+            convertButton.textContent = 'Convertendo...';
+
+            try {
+                const result = await convertImage(imageFile, format);
+                if (result.success) {
+                    imageDownloadLink.href = result.convertedImageUrl;
+                    imageDownloadLink.download = `converted_image.${format}`;
+                    imageResult.classList.remove('hidden');
+                    
+                    // Adicione este trecho para recarregar a página após o download
+                    imageDownloadLink.addEventListener('click', () => {
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1000);
+                    });
+                } else {
+                    alert('Erro ao converter a imagem. Por favor, tente novamente.');
+                }
+            } catch (error) {
+                alert('Ocorreu um erro. Por favor, tente novamente mais tarde.');
+            } finally {
+                convertButton.disabled = false;
+                convertButton.textContent = 'Converter Imagem';
+            }
+        });
     </script>
-  </body>
+</body>
 </html>
