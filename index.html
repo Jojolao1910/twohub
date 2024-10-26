@@ -32,9 +32,81 @@
     <div id="root"></div>
 
     <script type="text/babel">
+      const translations = {
+        pt: {
+          title: "TubHub - Baixe vídeos do YouTube",
+          subtitle: "Baixe vídeos do YouTube com facilidade",
+          downloadTitle: "Baixar Vídeo do YouTube",
+          downloadInstructions:
+            "Cole o link do vídeo do YouTube abaixo, escolha as opções e clique em Baixar",
+          format: "Formato",
+          resolution: "Resolução",
+          download: "Baixar",
+          processing: "Processando...",
+          clickToDownload: "Clique aqui para baixar",
+          howToUse: "Como usar",
+          howToUseSteps: [
+            "Cole o link do vídeo do YouTube no campo acima",
+            "Escolha o formato (MP3 ou MP4) e a resolução desejada",
+            'Clique no botão "Baixar"',
+            "Aguarde o processamento do vídeo",
+            "Clique no link de download quando estiver pronto",
+          ],
+          footer:
+            "© 2023 TubHub. Todos os direitos reservados. Use com responsabilidade e respeite os direitos autorais.",
+        },
+        en: {
+          title: "TubHub - Download YouTube Videos",
+          subtitle: "Download YouTube videos with ease",
+          downloadTitle: "Download YouTube Video",
+          downloadInstructions:
+            "Paste the YouTube video link below, choose options and click Download",
+          format: "Format",
+          resolution: "Resolution",
+          download: "Download",
+          processing: "Processing...",
+          clickToDownload: "Click here to download",
+          howToUse: "How to use",
+          howToUseSteps: [
+            "Paste the YouTube video link in the field above",
+            "Choose the format (MP3 or MP4) and desired resolution",
+            'Click the "Download" button',
+            "Wait for the video to process",
+            "Click the download link when ready",
+          ],
+          footer:
+            "© 2023 TubHub. All rights reserved. Use responsibly and respect copyrights.",
+        },
+        es: {
+          title: "TubHub - Descarga videos de YouTube",
+          subtitle: "Descarga videos de YouTube con facilidad",
+          downloadTitle: "Descargar Video de YouTube",
+          downloadInstructions:
+            "Pega el enlace del video de YouTube abajo, elige las opciones y haz clic en Descargar",
+          format: "Formato",
+          resolution: "Resolución",
+          download: "Descargar",
+          processing: "Procesando...",
+          clickToDownload: "Haz clic aquí para descargar",
+          howToUse: "Cómo usar",
+          howToUseSteps: [
+            "Pega el enlace del video de YouTube en el campo de arriba",
+            "Elige el formato (MP3 o MP4) y la resolución deseada",
+            'Haz clic en el botón "Descargar"',
+            "Espera a que se procese el video",
+            "Haz clic en el enlace de descarga cuando esté listo",
+          ],
+          footer:
+            "© 2024 TubHub. Todos los derechos reservados. Úsalo responsablemente y respeta los derechos de autor.",
+        },
+      };
+
       function TubHub() {
         const [theme, setTheme] = React.useState(() => {
           return localStorage.getItem("theme") || "light";
+        });
+        const [lang, setLang] = React.useState(() => {
+          return localStorage.getItem("lang") || "pt";
         });
         const [videoUrl, setVideoUrl] = React.useState("");
         const [format, setFormat] = React.useState("mp4");
@@ -42,13 +114,21 @@
         const [isLoading, setIsLoading] = React.useState(false);
         const [downloadLink, setDownloadLink] = React.useState("");
 
+        const t = translations[lang];
+
         React.useEffect(() => {
           document.documentElement.classList.toggle("dark", theme === "dark");
           localStorage.setItem("theme", theme);
-        }, [theme]);
+          localStorage.setItem("lang", lang);
+          document.title = t.title;
+        }, [theme, lang]);
 
         const toggleTheme = () => {
           setTheme((prevTheme) => (prevTheme === "light" ? "dark" : "light"));
+        };
+
+        const changeLanguage = (newLang) => {
+          setLang(newLang);
         };
 
         const handleDownload = async () => {
@@ -61,11 +141,7 @@
               headers: {
                 "Content-Type": "application/json",
               },
-              body: JSON.stringify({
-                url: videoUrl,
-                format: format,
-                resolution: resolution,
-              }),
+              body: JSON.stringify({ url: videoUrl, format, resolution }),
             });
 
             const data = await response.json();
@@ -108,45 +184,85 @@
                     TubHub
                   </h1>
                   <p className="text-gray-600 dark:text-gray-300 mt-2 text-sm md:text-base">
-                    Baixe vídeos do YouTube com facilidade
+                    {t.subtitle}
                   </p>
                 </div>
-                <button
-                  onClick={toggleTheme}
-                  className="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
-                >
-                  {theme === "dark" ? (
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-6 w-6"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
+                <div className="flex items-center space-x-4">
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => changeLanguage("pt")}
+                      className={`w-8 h-8 rounded-full overflow-hidden ${
+                        lang === "pt" ? "ring-2 ring-primary" : ""
+                      }`}
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+                      <img
+                        src="https://flagcdn.com/w40/br.png"
+                        alt="Português"
+                        className="w-full h-full object-cover"
                       />
-                    </svg>
-                  ) : (
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-6 w-6"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
+                    </button>
+                    <button
+                      onClick={() => changeLanguage("en")}
+                      className={`w-8 h-8 rounded-full overflow-hidden ${
+                        lang === "en" ? "ring-2 ring-primary" : ""
+                      }`}
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+                      <img
+                        src="https://flagcdn.com/w40/gb.png"
+                        alt="English"
+                        className="w-full h-full object-cover"
                       />
-                    </svg>
-                  )}
-                </button>
+                    </button>
+                    <button
+                      onClick={() => changeLanguage("es")}
+                      className={`w-8 h-8 rounded-full overflow-hidden ${
+                        lang === "es" ? "ring-2 ring-primary" : ""
+                      }`}
+                    >
+                      <img
+                        src="https://flagcdn.com/w40/es.png"
+                        alt="Español"
+                        className="w-full h-full object-cover"
+                      />
+                    </button>
+                  </div>
+                  <button
+                    onClick={toggleTheme}
+                    className="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
+                  >
+                    {theme === "dark" ? (
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-6 w-6"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+                        />
+                      </svg>
+                    ) : (
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-6 w-6"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+                        />
+                      </svg>
+                    )}
+                  </button>
+                </div>
               </div>
             </header>
 
@@ -154,11 +270,10 @@
               <div className="w-full max-w-2xl mx-auto bg-white dark:bg-gray-700 rounded-lg shadow-lg overflow-hidden">
                 <div className="p-6">
                   <h2 className="text-xl md:text-2xl font-semibold mb-2 text-gray-800 dark:text-white">
-                    Baixar Vídeo do YouTube
+                    {t.downloadTitle}
                   </h2>
                   <p className="text-gray-600 dark:text-gray-300 mb-4">
-                    Cole o link do vídeo do YouTube abaixo, escolha as opções e
-                    clique em Baixar
+                    {t.downloadInstructions}
                   </p>
                   <div className="space-y-4">
                     <input
@@ -171,7 +286,7 @@
                     <div className="flex space-x-4">
                       <div className="flex-1">
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                          Formato
+                          {t.format}
                         </label>
                         <select
                           value={format}
@@ -184,7 +299,7 @@
                       </div>
                       <div className="flex-1">
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                          Resolução
+                          {t.resolution}
                         </label>
                         <select
                           value={resolution}
@@ -226,7 +341,7 @@
                               d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                             ></path>
                           </svg>
-                          Processando...
+                          {t.processing}
                         </span>
                       ) : (
                         <>
@@ -242,7 +357,7 @@
                               clipRule="evenodd"
                             />
                           </svg>
-                          Baixar
+                          {t.download}
                         </>
                       )}
                     </button>
@@ -254,7 +369,7 @@
                           target="_blank"
                           rel="noopener noreferrer"
                         >
-                          Clique aqui para baixar
+                          {t.clickToDownload}
                         </a>
                       </div>
                     )}
@@ -264,24 +379,19 @@
 
               <section className="mt-12 text-center">
                 <h2 className="text-xl md:text-2xl font-semibold mb-4 text-gray-800 dark:text-white">
-                  Como usar
+                  {t.howToUse}
                 </h2>
                 <ol className="list-decimal list-inside space-y-2 text-sm md:text-base inline-block text-left text-gray-700 dark:text-gray-300">
-                  <li>Cole o link do vídeo do YouTube no campo acima</li>
-                  <li>Escolha o formato (MP3 ou MP4) e a resolução desejada</li>
-                  <li>Clique no botão "Baixar"</li>
-                  <li>Aguarde o processamento do vídeo</li>
-                  <li>Clique no link de download quando estiver pronto</li>
+                  {t.howToUseSteps.map((step, index) => (
+                    <li key={index}>{step}</li>
+                  ))}
                 </ol>
               </section>
             </main>
 
             <footer className="bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 py-6 mt-8">
               <div className="container mx-auto px-4">
-                <p className="text-center text-sm md:text-base">
-                  © 2024 TubHub. Todos os direitos reservados. Use com
-                  responsabilidade e respeite os direitos autorais.
-                </p>
+                <p className="text-center text-sm md:text-base">{t.footer}</p>
               </div>
             </footer>
           </div>
