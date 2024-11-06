@@ -1,0 +1,50 @@
+{
+  "name": "vue-vite",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@heroicons-plus/vue": "1.0.5",
+    "@heroicons/vue": "2.1.5",
+    "@types/node": "22.9.0",
+    "autoprefixer": "10.4.20",
+    "axios": "1.7.7",
+    "chart.js": "4.4.6",
+    "cra-template-base-tailwind": "1.0.2",
+    "debounce": "2.2.0",
+    "echarts": "5.5.1",
+    "heroicons": "2.1.5",
+    "latest": "0.2.0",
+    "lodash": "4.17.21",
+    "lucide": "0.454.0",
+    "lucide-vue-next": "0.454.0",
+    "node": "22.11.0",
+    "nodejs": "0.0.0",
+    "npm": "10.9.0",
+    "path": "0.12.7",
+    "path-dirname": "1.0.2",
+    "path.js": "2.0.0",
+    "pinia": "2.2.6",
+    "postcss": "8.4.47",
+    "socket.io": "4.8.1",
+    "socket.io-client": "4.8.1",
+    "tailwind-merge": "2.5.4",
+    "tailwindbase": "1.0.0",
+    "tailwindcss": "3.4.14",
+    "tw-elements": "2.0.0",
+    "types": "0.1.1",
+    "vue": "^3.5.12",
+    "vue-router": "4.4.5"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.1.4",
+    "typescript": "^5.2.2",
+    "vite": "^5.4.10",
+    "vue-tsc": "^1.8.27"
+  }
+}
